@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Digit Recognition — Neural Canvas</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Google Fonts: Syne (display) + DM Mono (data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="app-wrapper">
+
+    <!-- ── Header ──────────────────────────────── -->
+    <header class="header">
+      <div class="header-chip">CNN · MNIST · TensorFlow</div>
+      <h1 class="header-title">Neural <span class="accent">Canvas</span></h1>
+      <p class="header-sub">Draw a digit · Let the network think</p>
+    </header>
+
+    <!-- ── Main Layout ──────────────────────────── -->
+    <main class="main-grid">
+
+      <!-- Left: Drawing Pad -->
+      <section class="card canvas-card">
+        <div class="card-label">
+          <span class="dot dot-green"></span>
+          Drawing Pad
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="drawingCanvas" width="400" height="400"></canvas>
+          <div class="canvas-hint" id="canvasHint">Draw a digit here</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="clearBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+            Clear
+          </button>
+          <button class="btn btn-primary" id="predictBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Predict
+          </button>
+        </div>
+      </section>
+
+      <!-- Right: Result Panel -->
+      <section class="card result-card" id="resultCard">
+
+        <!-- Idle state -->
+        <div class="result-idle" id="resultIdle">
+          <div class="idle-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p class="idle-text">Draw a digit on the canvas<br>and press <strong>Predict</strong></p>
+        </div>
+
+        <!-- Loading state -->
+        <div class="result-loading" id="resultLoading" style="display:none">
+          <div class="neural-loader">
+            <div class="nl-ring"></div>
+            <div class="nl-ring"></div>
+            <div class="nl-ring"></div>
+          </div>
+          <p class="loading-text">Analyzing strokes…</p>
+        </div>
+
+        <!-- Prediction result -->
+        <div class="result-output" id="resultOutput" style="display:none">
+          <div class="card-label">
+            <span class="dot dot-blue"></span>
+            Prediction
+          </div>
+
+          <div class="digit-display">
+            <span class="digit-number" id="digitNumber">—</span>
+          </div>
+
+          <div class="confidence-block">
+            <div class="conf-label">
+              <span>Confidence</span>
+              <span class="conf-value" id="confValue">0%</span>
+            </div>
+            <div class="conf-bar-track">
+              <div class="conf-bar-fill" id="confBar"></div>
+            </div>
+          </div>
+
+          <!-- Probability chart for all 10 digits -->
+          <div class="prob-section">
+            <p class="prob-title">All probabilities</p>
+            <div class="prob-grid" id="probGrid"></div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div class="result-error" id="resultError" style="display:none">
+          <div class="error-icon">⚠</div>
+          <p class="error-text" id="errorText">Something went wrong.</p>
+          <button class="btn btn-ghost btn-sm" onclick="resetResult()">Try again</button>
+        </div>
+
+      </section>
+    </main>
+
+    <!-- ── Footer ──────────────────────────────── -->
+    <footer class="footer">
+      Built with Flask · TensorFlow/Keras · CNN trained on MNIST (60 000 samples)
+    </footer>
+
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
