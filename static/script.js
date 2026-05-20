@@ -165,12 +165,94 @@ function buildProbGrid(probabilities, topDigit) {
 /* ── Predict ──────────────────────────────────────────────── */
 async function predict() {
   if (!hasDrawing) {
-    // Gently pulse the canvas hint
     canvasHint.classList.remove("hidden");
     canvasHint.style.color = "#e8890a";
-    setTimeout(() => { canvasHint.style.color = ""; }, 1200);
+
+    setTimeout(() => {
+      canvasHint.style.color = "";
+    }, 1200);
+
     return;
   }
+
+  predictBtn.disabled = true;
+  clearBtn.disabled = true;
+
+  showState("loading");
+
+  try {
+
+    // Smaller image size = MUCH faster upload
+    const imageData = canvas.toDataURL("image/jpeg", 0.5);
+
+    const response = await fetch("/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        image: imageData
+      })
+    });
+
+    // Get raw response FIRST
+    const rawText = await response.text();
+
+    console.log("RAW SERVER RESPONSE:", rawText);
+
+    // Prevent empty-response JSON crash
+    if (!rawText) {
+      throw new Error("Empty server response");
+    }
+
+    let data;
+
+    try {
+      data = JSON.parse(rawText);
+    } catch (jsonError) {
+      throw new Error("Invalid JSON returned from server");
+    }
+
+    // Handle backend errors
+    if (!response.ok) {
+      throw new Error(data.error || `Server Error ${response.status}`);
+    }
+
+    // ── Render Result ───────────────────────────
+    showState("output");
+
+    digitNumber.textContent = data.digit;
+
+    const conf = data.confidence;
+
+    confValue.textContent = conf.toFixed(1) + "%";
+
+    setTimeout(() => {
+      confBar.style.width = conf + "%";
+    }, 80);
+
+    // Probability grid safe fallback
+    if (data.probabilities) {
+      buildProbGrid(data.probabilities, data.digit);
+    } else {
+      probGrid.innerHTML = "";
+    }
+
+  } catch (err) {
+
+    console.error("Prediction error:", err);
+
+    errorText.textContent =
+      err.message || "Prediction failed";
+
+    showState("error");
+
+  } finally {
+
+    predictBtn.disabled = false;
+    clearBtn.disabled = false;
+  }
+}
 
   // Disable buttons while request is in-flight
   predictBtn.disabled = true;
