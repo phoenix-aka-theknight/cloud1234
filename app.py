@@ -74,11 +74,11 @@ logger.info("Initializing model...")
 
 model = load_model()
 
-# Warmup prediction (VERY IMPORTANT)
+# Warmup prediction (IMPORTANT)
 dummy = np.zeros((1, 28, 28, 1), dtype=np.float32)
 
 with model_lock:
-    model.predict(dummy, verbose=0)
+    model(dummy, training=False).numpy()
 
 logger.info("Model ready.")
 
@@ -148,15 +148,21 @@ def predict():
 
         image_data = data["image"]
 
+        logger.info("Processing image")
+
         # Preprocess image
         img_array = preprocess_image(image_data)
 
-        # Predict safely
+        logger.info("Running prediction")
+
+        # MUCH faster than model.predict()
         with model_lock:
-            predictions = model.predict(
+            predictions = model(
                 img_array,
-                verbose=0
-            )[0]
+                training=False
+            ).numpy()[0]
+
+        logger.info("Prediction complete")
 
         predicted_digit = int(np.argmax(predictions))
 
